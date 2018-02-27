@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>scroll 移动端滚动加载</title>
+  <style>
+  html,body{ width: 100%; height: 100%; overflow: hidden; background-color: #fff; }
+  *{ margin: 0; padding: 0; }
+  .scroll-wrapper{ position: absolute; left: 0; right: 0; top: 0; bottom:0;  width: 100%; overflow: hidden; }
+/*   .scroll-wrapper ul{ width: 100%; line-height: 50px; list-style-type: none;}
+  .scroll-wrapper ul li{ background-color: #fff; }
+  .scroll-wrapper ul li:nth-child(odd){ background-color: #f5f5f5; } */
+
+  .cmp-media-list {
+    position: relative;
+		padding: 10px;
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -moz-box; 
+		display: -ms-flexbox;
+		display: flex;
+		-webkit-box-align: center;
+		-webkit-align-items: center;
+		-ms-flex-align: center;
+		align-items: center;
+		flex-wrap: wrap;   	
+	}
+	.cmp-media-list li {
+		width: 50%;
+		height: 140px;
+		padding: 10px;	
+		box-sizing: border-box;
+    list-style-type: none;
+	}
+	.cmp-media-list li a {
+		display: block;
+		height: 120px;
+		background:#eee url('imgs/loading.gif') no-repeat center center;
+		overflow: hidden;
+	}	
+	.cmp-media-list li img {
+    display: block;
+		height: 100%;
+		width: auto;
+	}
+
+  .scroll-wrapper .scroll-header,
+  .scroll-wrapper .scroll-footer { display: none; padding:20px 0; line-height: 20px; color: #666; text-align: center;}
+  .scroll-wrapper .scroll-header .load-time { margin-top: 8px; color: #999; font-size: 12px; }
+  .scroll-wrapper .scroll-header .load-text .icon,
+  .scroll-wrapper .scroll-footer .load-text .icon { display: inline-block; width: 16px; height: 16px; margin-right: 5px; 
+    background-image: url('imgs/arrow.png');
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: 16px 16px; 
+    vertical-align: baseline; 
+    -webkit-transition: transform 0.3s ease-in-out;
+    -o-transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out;
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }
+  .scroll-wrapper .scroll-header .ready .icon{
+    -webkit-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+  .scroll-wrapper .scroll-header .loading .icon{
+    background-image: url('imgs/loading.png');
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }
+  .scroll-wrapper .scroll-header .finish .icon{
+    background-image: url('imgs/finish.png');
+    -webkit-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+  .scroll-wrapper .scroll-footer .load-text .icon{
+    -webkit-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+  .scroll-wrapper .scroll-footer .ready .icon{
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }
+  .scroll-wrapper .scroll-footer .loading .icon{
+    background-image: url('imgs/loading.png');
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }
+  .scroll-wrapper .scroll-footer .finish .icon{
+    background-image: url('imgs/hard.png');
+    -webkit-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+  #console {
+    position: absolute;
+    width: 200px;
+    top: 0;
+    left: 0;
+    z-index: 100;
+  }
+  </style>
+</head>
+<body>
+
+<div class="scroll-wrapper" id="scrollWrapper">
+  <div class="scroller">
+    <header class="scroll-header">
+      <p class="load-text">
+        <i class="icon"></i>
+        <span class="text">下拉更新数据</span>
+      </p>
+      <p class="load-time">最后更新时间：
+        <span class="state">刚刚更新</span>
+      </p>
+    </header>
+    <ul class="cmp-media-list" id="mediaList">
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li><li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f12.baidu.com/it/u=2274570580,3879986821&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+      <li>
+        <a href="http://www.op110.com" target="_blank">
+          <img data-src="http://f11.baidu.com/it/u=3243370105,1125765815&fm=72" class="lazyload" src="" alt="">
+        </a>
+      </li>
+    </ul>
+    <footer class="scroll-footer">
+      <p class="load-text">
+        <i class="icon"></i>
+        <span class="text">上拉加载更多</span>
+      </p>
+    </footer>
+  </div>
+</div>
+<script src="//cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/iScroll/5.2.0/iscroll-probe.min.js"></script>
+<script src="/dist/js/scrollLoad.js"></script>
+<script>
+var myScrollLoad = new ScrollLoad('#scrollWrapper', {
+  isScrollUp: true,
+  isLazyLoad: true,
+  iScrollOptions: {
+    scrollbars: true,
+    shrinkScrollbars: 'scale'
+  },
+  onScrollUpEnd: function(controller, curPage) {
+    var _html = '';
+    var i = 0;
+    var imgUrls = ['http://img2.imgtn.bdimg.com/it/u=3165219473,1427643487&fm=27&gp=0.jpg', 'http://img4.imgtn.bdimg.com/it/u=1728624989,886107605&fm=11&gp=0.jpg',
+'http://img4.imgtn.bdimg.com/it/u=587482272,362209690&fm=11&gp=0.jpg', 'http://img1.imgtn.bdimg.com/it/u=3779434774,1727618677&fm=27&gp=0.jpg',
+'http://img2.imgtn.bdimg.com/it/u=2566573906,1431550288&fm=27&gp=0.jpg', 'http://img5.imgtn.bdimg.com/it/u=3350504484,1692338877&fm=27&gp=0.jpg',
+'http://img4.imgtn.bdimg.com/it/u=2582225018,1538697830&fm=27&gp=0.jpg', 'http://img0.imgtn.bdimg.com/it/u=1496630423,676010647&fm=27&gp=0.jpg',
+'http://img5.imgtn.bdimg.com/it/u=3011435947,3288771608&fm=27&gp=0.jpg', 'http://img1.imgtn.bdimg.com/it/u=1840007159,343379474&fm=27&gp=0.jpg'];
+
+    while (i < imgUrls.length) {
+      _html += '<li><a href="http://www.baidu.com"><img data-src="'+ imgUrls[i] +'" class="lazyload" src="" alt=""></a></li>';
+      i++;
+    }
+    $('#scrollWrapper').find('ul').prepend(_html);
+    
+    if (imgUrls.length > 0) {
+      controller.loading(); // 继续执行加载
+    } else {
+      controller.end(); // 加载完成，结束加载
+    }
+    
+  },
+  onScrollDownEnd: function(controller, curPage) {
+    /* var _html = '';
+    var i = 0;
+    var imgUrls = ['http://img2.imgtn.bdimg.com/it/u=3165219473,1427643487&fm=27&gp=0.jpg', 'http://img4.imgtn.bdimg.com/it/u=1728624989,886107605&fm=11&gp=0.jpg',
+'http://img4.imgtn.bdimg.com/it/u=587482272,362209690&fm=11&gp=0.jpg', 'http://img1.imgtn.bdimg.com/it/u=3779434774,1727618677&fm=27&gp=0.jpg',
+'http://img2.imgtn.bdimg.com/it/u=2566573906,1431550288&fm=27&gp=0.jpg', 'http://img5.imgtn.bdimg.com/it/u=3350504484,1692338877&fm=27&gp=0.jpg',
+'http://img4.imgtn.bdimg.com/it/u=2582225018,1538697830&fm=27&gp=0.jpg', 'http://img0.imgtn.bdimg.com/it/u=1496630423,676010647&fm=27&gp=0.jpg',
+'http://img5.imgtn.bdimg.com/it/u=3011435947,3288771608&fm=27&gp=0.jpg', 'http://img1.imgtn.bdimg.com/it/u=1840007159,343379474&fm=27&gp=0.jpg'];
+
+    while (i < imgUrls.length) {
+      _html += '<li><a href="http://www.baidu.com"><img data-src="'+ imgUrls[i] +'" class="lazyload" src="" alt=""></a></li>';
+      i++;
+    }
+    $('#scrollWrapper').find('ul').append(_html);
+    
+    if (imgUrls.length > 0) {
+      controller.loading();
+    } else {
+      controller.end();
+    } */
+    controller.end();
+  }
+});
+
+</script>  
+</body>
+</html>
